@@ -1,7 +1,10 @@
 ## Photoplethysmograph: Beat-to-Beat Heart Rate With Auto-calibration
 
-### Table of Contents
-[Introduction] (##Introduction)
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [Photoplethysmograph: Beat-to-Beat Heart Rate With Auto-calibration](#)
+	- [Table of Contents](#)
+- [Introduction:](#)
 
 ## Introduction: 
 

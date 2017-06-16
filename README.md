@@ -5,7 +5,7 @@
 - [Photoplethysmograph: Beat-to-Beat Heart Rate With Auto-calibration](#)
 - [Introduction](#Introduction:)
 
-## Introduction: 
+## Introduction 
 
 A plethysmograph is an instrument for measuring changes in volume within an 
 organ of the body. A photoplethysmograph uses optics to achieve this volumetric 

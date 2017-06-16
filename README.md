@@ -1,5 +1,10 @@
 ## Photoplethysmograph: Beat-to-Beat Heart Rate With Auto-calibration
 
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [Photoplethysmograph: Beat-to-Beat Heart Rate With Auto-calibration](#)
+- [Introduction:](#)
+
 ## Introduction: 
 
 A plethysmograph is an instrument for measuring changes in volume within an 

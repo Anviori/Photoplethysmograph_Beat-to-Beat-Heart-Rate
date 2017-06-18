@@ -109,6 +109,6 @@ ATmega16A’s analog comparator.
 
 ## Demo Video
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=YOUTUBE_VIDEO_ID_HERE
-" target="_blank"><img src="http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg" 
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=9BOhHENQnds
+" target="_blank"><img src="http://img.youtube.com/vi/9BOhHENQnds/0.jpg" 
 alt="Project Demo" width="240" height="180" border="10" /></a>

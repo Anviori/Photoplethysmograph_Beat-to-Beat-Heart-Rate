@@ -31,27 +31,30 @@ the cardiac cycle.
 The two most common measurements derived from a photoplethysmogram signal are heart rate 
 and blood oxygen saturation (SpO2). This system includes an analog front end circuit that
 models a photoplethysmo-graph and, using the MCU's input capture feature, measures the 
-heart rate [(*The schematic is shown in Figure-1 Below*](#figure1-analog-front-end-circuit)
+heart rate. [*Schematic: Figure1*](#figure1-analog-front-end-circuit)
 
 The infrared LED's used a 100 ohm potentiometer to set the current. This needed to be replaced
 to allow automatic adjustments in current through the LEDs for different individuals. First,
 an ideal value for the photo-transistor must be found when someones finger tip is between the
 infrared diodes and the photo-transistor. A voltage divider connected to the supply voltage is
-adjusted to aquire the ideal voltage. (Schematic Figure1) This voltage is the set-point voltage. 
+adjusted to aquire the ideal voltage. This voltage is the set-point voltage. [*Schematic: Figure2*] (#figure2-autocalibration)
 
 A digital potentiometer is used to automatically adjust the current through the infrared LEDs 
 until the photo-transistor's collector voltage is equal to the set-point voltage; a voltage
-between 0.3V and 1.0V.(*The schematic is shown in Figure-2 Below*)
+between 0.3V and 1.0V.[*Schematic: Figure3*](#figure1-analog-front-end-circuit-with-digital-potentiometer)
 
 The system measures heart rates from 40 to 200 bpm and displays them on an LCD with a resolution 
-of 0.1 bpm. (*System demo shown below*)
+of 0.1 bpm. [*System Demo Video*] (#demo-video)
 
 ## Schematics
 
 ###### Figure1 Analog Front End Circuit
 ![alt text](http://i.imgur.com/9PJWSe1.png "Analog front end circuit")
 
-###### Figure2 Analog Front End Circuit With Digital Potentiometer
+###### Figure2 Autocalibration 
+![alt text](http://i.imgur.com/gjlVa3j.png "Analog front end circuit")
+
+###### Figure3 Analog Front End Circuit With Digital Potentiometer
 ![alt text](http://i.imgur.com/OSxhrTG.png "Analog front end circuit")
 
 ## Demo Video

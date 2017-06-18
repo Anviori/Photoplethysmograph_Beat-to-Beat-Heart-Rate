@@ -4,14 +4,34 @@
 
 - [Photoplethysmograph: Beat-to-Beat Heart Rate With Auto-calibration](#)
 - [Introduction](#introduction)
+- [Schematics](#schematics)
+- [Demo Video](#demovideo)
 
 ## Introduction 
 
-A plethysmograph is an instrument for measuring changes in volume within an 
-organ of the body. A photoplethysmograph uses optics to achieve this volumetric 
-measurement. The signal obtained from such a measurement is called a photoplethys
-mogram (PPG).The skin is richly profused, so it is relatively easy to use an LED
- and photodiode or phototransis-tor to detect changes in the blood volume in the
+AVR Assembler was used to program an ATmega16A to build an embedded system 
+(A plethysmograph) that monitors heart rate with auto-calibration.
+
+*A plethysmograph is an instrument for measuring changes in volume within an 
+organ of the body.*
+
+The system uses optics to obtain a photoplethysmogram (PPG) (The a signal 
+obtained by the plethysmograph measurement).
+
+● To measure the heart rate, two Infrared LEDs are used to transmit light 
+through the finger tip and an Infrared Photo-transistor detects the light on 
+the other side. The light reaching the Photo-transistor causes its collector 
+voltage to increase. This voltage value is the photoplethysmogram signal used 
+to derive the heart rate.
+● The auto-calibration was accomplished using a digital potentiometer. This 
+allowed the current through the infrared LEDs to be automatically adjusted for 
+different individuals, and the voltage to be kept between 0.3V and 1.0V at the 
+collector of the photo-transistor.
+● The system measures heart rates from 40 to 200 bpm and displays them on an 
+LCD with a resolution of 0.1 bpm.
+
+ The skin is richly profused, so it is relatively easy to use an LED
+and photodiode or phototransis-tor to detect changes in the blood volume in the
  finger tip caused by the pressure pulse of the car-diac cycle.For example, in a 
  transmissive absorption approach to this measurement, an LED placed on one side
  of the finger tip transmits light through the finger tip and the light is 
@@ -84,6 +104,10 @@ to use its ADC.The objective of automatic calibration will be accomplished in
 the laboratory in three tasks. The first two tasks are just for you to become 
 familiar with the operation of the MAX5402 and the operation of the 
 ATmega16A’s analog comparator.
+
+## Schematics
+
+## Demo. Video
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=YOUTUBE_VIDEO_ID_HERE
 " target="_blank"><img src="http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg" 

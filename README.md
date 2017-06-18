@@ -110,4 +110,4 @@ ATmega16A’s analog comparator.
 ## Demo Video
 
 [![Project Demo](https://img.youtube.com/vi/9BOhHENQnds/0.jpg)]
-https://www.youtube.com/watch?v=9BOhHENQnds "Project Demo - Click to Watch!")
+(https://www.youtube.com/watch?v=9BOhHENQnds "Project Demo - Click to Watch!")

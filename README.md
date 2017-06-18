@@ -18,38 +18,31 @@ organ of the body.*
 The system uses optics to obtain a photoplethysmogram (PPG) (The a signal 
 obtained by the plethysmograph measurement).
 
-● To measure the heart rate, two Infrared LEDs are used to transmit light 
+To aquire this signal, two Infrared LEDs are used to transmit light 
 through the finger tip and an Infrared Photo-transistor detects the light on 
-the other side. The light reaching the Photo-transistor causes its collector 
-voltage to increase. This voltage value is the photoplethysmogram signal used 
-to derive the heart rate.
-● The auto-calibration was accomplished using a digital potentiometer. This 
+the other side. The pressure pulse of the cardiac cycle increases the blood 
+volume in the finger tip and more light is absorbed. This light causes its collector 
+voltage of the photo-transistor to increase. This voltage value is the 
+photoplethysmogram signal used to derive the heart rate. The DC component of the signal 
+obtained is attributable to the absorption of the skin tissue. The AC component is 
+attributable to the variation in blood volume in the skin caused by the pressure pulse of 
+the cardiac cycle.
+
+The two most common measurements derived from a photoplethysmogram signal are heart rate 
+and blood oxygen saturation (SpO2). This system includes an analog front end circuit that
+models a photoplethysmo-graph and, using the MCU's input capture feature, measures the 
+heart rate (Shown in Figure-1 Below)
+
+The infrared LED's used a 100 ohm potentiometer 
+
+The auto-calibration was accomplished using a digital potentiometer. This 
 allowed the current through the infrared LEDs to be automatically adjusted for 
 different individuals, and the voltage to be kept between 0.3V and 1.0V at the 
 collector of the photo-transistor.
 ● The system measures heart rates from 40 to 200 bpm and displays them on an 
 LCD with a resolution of 0.1 bpm.
 
- The skin is richly profused, so it is relatively easy to use an LED
-and photodiode or phototransis-tor to detect changes in the blood volume in the
- finger tip caused by the pressure pulse of the car-diac cycle.For example, in a 
- transmissive absorption approach to this measurement, an LED placed on one side
- of the finger tip transmits light through the finger tip and the light is 
- detected on the other side by a phototransistor. The pressure pulse of the 
- cardiac cycle increases the blood volume in the finger tip and more light is 
- absorbed. This reduces the light reaching the phototransistor and causes its 
- collector voltage to increase. The signal at the transistor’s collector is the 
- photoplethys-mogram signal.The DC component of the signal obtained is 
- attributable to the bulk absorption of the skin tissue. The AC component is 
- directly attributable to variation in blood volume in the skin caused by the 
- pressure pulse of the cardiac cycle. The height of AC component of the 
- photoplethysmogram is proportional to the pulse pressure, the difference 
- between the systolic and diastolic pressure in the arteries.Quite a bit of 
- medical information can be derived from a photoplethysmogram. However, the two 
- most commonly measured or derived quantities are heart rate and blood oxygen 
- saturation (SpO2).In this laboratory you will add an analog front end circuit, 
- that is basically a photoplethysmo-graph, to your system. From this you will 
- use input capture to measure the beat-to-beat heart rate.
+
  
 One drawback of the photoplethysmograph system from Laboratory 10 was that the 
 100 ohm potentiometer (R1), which sets the current through the LN66F infrared 
@@ -106,6 +99,9 @@ familiar with the operation of the MAX5402 and the operation of the
 ATmega16A’s analog comparator.
 
 ## Schematics
+
+###### Figure-1: Analog front end circuit
+![alt text](http://i.imgur.com/huBq5eb.png "Analog front end circuit")
 
 ## Demo Video
 

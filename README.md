@@ -5,7 +5,7 @@
 - [Photoplethysmograph: Beat-to-Beat Heart Rate With Auto-calibration](#)
 - [Introduction](#introduction)
 - [Schematics](#schematics)
-- [Demo Video](#demo video)
+- [Demo Video](#demovideo)
 
 ## Introduction 
 

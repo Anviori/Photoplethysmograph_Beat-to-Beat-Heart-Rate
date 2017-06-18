@@ -2,7 +2,7 @@
 
 ### Table of Contents
 
-- [Photoplethysmograph: Beat-to-Beat Heart Rate With Auto-calibration](#)
+- [Photoplethysmograph: Beat-to-Beat Heart Rate With Auto-calibration](#photoplethysmograph:-beat-to-beat-heart-rate-with-auto-calibration)
 - [Introduction](#introduction)
 - [Schematics](#schematics)
 - [Demo Video](#demo-video)
@@ -31,77 +31,28 @@ the cardiac cycle.
 The two most common measurements derived from a photoplethysmogram signal are heart rate 
 and blood oxygen saturation (SpO2). This system includes an analog front end circuit that
 models a photoplethysmo-graph and, using the MCU's input capture feature, measures the 
-heart rate (Shown in Figure-1 Below)
+heart rate (*The schematic is shown in Figure-1 Below*)
 
-The infrared LED's used a 100 ohm potentiometer 
+The infrared LED's used a 100 ohm potentiometer to set the current. This needed to be replaced
+to allow automatic adjustments in current through the LEDs for different individuals. First,
+an ideal value for the photo-transistor must be found when someones finger tip is between the
+infrared diodes and the photo-transistor. A voltage divider connected to the supply voltage is
+adjusted to aquire the ideal voltage. This voltage is the set-point voltage. 
 
-The auto-calibration was accomplished using a digital potentiometer. This 
-allowed the current through the infrared LEDs to be automatically adjusted for 
-different individuals, and the voltage to be kept between 0.3V and 1.0V at the 
-collector of the photo-transistor.
-● The system measures heart rates from 40 to 200 bpm and displays them on an 
-LCD with a resolution of 0.1 bpm.
+A digital potentiometer is used to automatically adjust the current through the infrared LEDs 
+until the photo-transistor's collector voltage is equal to the set-point voltage; a voltage
+between 0.3V and 1.0V.(*The schematic is shown in Figure-2 Below*)
 
-
- 
-One drawback of the photoplethysmograph system from Laboratory 10 was that the 
-100 ohm potentiometer (R1), which sets the current through the LN66F infrared 
-LEDs, may need to be adjusted for different individuals. This adjustment is 
-necessary to get a voltage in the range 0.3V to 1.0V at the collector, VCE, of 
-the LTR-3208E phototransistor when an individual’s finger tip is placed between 
-the infrared LEDs and phototransistor.For the system to be more convenient, 
-this adjustment needs to be automatic. One way to do this is with an analog 
-feedback control circuit. However, since the primary focus of this course is 
-on embedded systems design, not analog circuit design, we need to find a way 
-to do this calibration automatically in the digital domain.Any feedback 
-control system needs a setpoint, the value you want your system to achieve. 
-For your particular circuit from Laboratory 10 there was an ideal value for 
-the LTR-3208E’s VCEwhen someone’s finger tip was between the infrared diodes 
-and phototransistor. A voltage divider connected to the supply voltage, which 
-consists of a fixed resistor and a mechanical potentiome-ter, can be adjusted 
-to create a voltage equal to the ideal VCE. This voltage is the setpoint 
-voltage. The expectation is that this mechanical potentiometer would be 
-adjusted when the system is built and would not, typically, require subsequent 
-adjustment.Next you need a way to electronically, not mechanically, adjust the 
-current through the LEDs so that the LTR-3208E’s VCE is equal to the setpoint 
-voltage. To accomplish this, the mechanical potentiometer R1, from Laboratory 
-10, is replaced by a ZTX555 PNP transistor in a high side drive configuration. 
-This is similar to the approach used to digit drive the multiplexed 
-seven-seg-ment LED display in previous laboratories. However, instead of 
-having a single fixed base resis-tor, the base resistance consists of a fixed 
-resistor in series with a MAX5402 digital potentiometer. 
-
-A digital potentiometer is also called a digitally controlled variable 
-resistor (VR) or an RDAC. The high end (H) of the digital potentiometer is 
-connected to the fixed resistor and the wiper (W) is connected to PC1. PC1 
-must be 0 to turn the infrared LEDs ON. The low end (L) of the MAX5402 is 
-left unconnected. By changing the value of resistance between W and H, the 
-ZTX555’s base current can be changed. This changes the ZTX555’s collector 
-current and, in turn, the LTR-3208E’s VCE.An 8-bit value must be sent, 
-serially, to the MAX5402 to set its resistance. These 8 bits determine the 
-position of the MAX5402’s wiper. An 8-bit value allows one of 256 positions 
-to be specified. The 8-bit value is sent serially using the serial peripheral 
-interface (SPI) protocol. Thus, your pro-gram can set the resistance between 
-H and W of the MAX5402.The ATmega16A contains an analog comparator that can 
-be used to compare the LTR-3208E’s VCE with the setpoint voltage. The 
-comparator’s output indicates whether VCE is above or below the setpoint. By 
-looking at the comparator’s output, your program can determine whether to 
-decrease the ZTX555’ base resistance to decrease LTR-3208E’s VCE, or increase 
-the base resis-tance to increase the LTR-3208E’s VCE.A better approach for 
-comparing VCE to its setpoint value would be to simply make a connection from 
-the collector of the LTR-3208E to one of the ATmega16A’s analog-to-digital 
-converter (ADC) inputs and measure the LTR-3208E’s VCE. The measured value 
-could then be compared with a program constant equal to the setpoint value. 
-However, learning to use the ATmega16A’s comparator is simpler than learning 
-to use its ADC.The objective of automatic calibration will be accomplished in 
-the laboratory in three tasks. The first two tasks are just for you to become 
-familiar with the operation of the MAX5402 and the operation of the 
-ATmega16A’s analog comparator.
+The system measures heart rates from 40 to 200 bpm and displays them on an LCD with a resolution 
+of 0.1 bpm. (*System demo shown below*)
 
 ## Schematics
 
-###### Figure-1: Analog front end circuit
-![alt text](http://i.imgur.com/huBq5eb.png "Analog front end circuit")
+###### Figure-1: Analog Front End Circuit
+![alt text](http://i.imgur.com/9PJWSe1.png "Analog front end circuit")
+
+###### Figure-2: Analog Front End Circuit With Digital Potentiometer
+![alt text](http://i.imgur.com/OSxhrTG.png "Analog front end circuit")
 
 ## Demo Video
 

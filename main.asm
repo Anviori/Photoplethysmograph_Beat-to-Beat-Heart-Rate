@@ -1,9 +1,9 @@
 //*-------------------------------------------
 //*
 //* Title: heart_rate_auto_cal
-//* Author: Wilmer, Ji Hyun
+//* Author: Wilmer Suarez
 //* Version: 2.0
-//* Last updated: 12/06/16
+//* Last updated: 06/19/17
 //* Target: ATmega16
 //*
 //* DESCRIPTION: Using Timer/Counter1, this 

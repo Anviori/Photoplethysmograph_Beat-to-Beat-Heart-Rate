@@ -2,7 +2,6 @@
 
 ### Table of Contents
 
-- [Photoplethysmograph: Beat-to-Beat Heart Rate With Auto-calibration](#)
 - [Introduction](#introduction)
 - [Schematics](#schematics)
 - [Demo Video](#demo-video)

@@ -1,147 +1,106 @@
-//*-------------------------------------------
-//*
-//* Title: heart_rate_auto_cal
-//* Author: Wilmer Suarez
-//* Version: 2.0
-//* Last updated: 06/19/17
-//* Target: ATmega16
-//*
-//* DESCRIPTION: Using Timer/Counter1, this 
-//* program measures the period of the signal'
-//* coming from the analog front end circuit.
-//* This is done using Input Capture, the 
-//* period is measured and, from it, the 
-//* frequency is calculated and displayed
-//* on the LCD Module. This calculated frequency
-//* is essentially the heart reate.
-//*
-//* Ports:
-//* PORTA:
-//* PA0 = RC OUTPUT
-//*
-//* PortB:
-//* PB6 - PB0 outputs, SPI output to a 
-//* 10-Pin Header for the DOGM081L-A 
-//* LCD
-//* PIN2 = Comparator Pos.
-//* PIN3 = Comparator Neg.
-//* PIN4 = Slave Select OUTPUT
-//* PIN5 = MOSI OUPUT
-//* PIN7 = SCK OUTPUT
-//*
-//* PortC:
-//* J-tag inputs
-//* PIN0 = CHIP SELECT OUTPUT
-//*
-//* PortD:
-//* PD6(INT1) input for the function 
-//* generator ICP1
-//* PIN6 = Vout input from
-//* Analog Front End Circuit
-//*
-//* VERSION HISTORY
-//* 1.0 Original version
-//* 2.0 Modified for Auto-Calibration
-//*
-//*-------------------------------------------
+;==============================================================================
+; Project Title: Beat to Beat Heart Rate Monitor with Autocalibration
+; Author: Wilmer Suarez
+; Version: 3.0
+; Last updated: --/--/19
+; Target: ATmega16 @ 1MHz
+; Total number of words:
+; Total number of cycles:
+;
+; DESCRIPTION: Using Timer/Counter1, this program measures the period of the
+; signal coming from the analog front end circuit. This is done using Input
+; Capture. The period is measured and, from it, the frequency is calculated
+; and displayed on the LCD Module. This calculated frequency ~= heart reate.
+;
+; VERSION HISTORY
+; 1.0 Base Version
+; 2.0 Modified for Auto-Calibration
+; 3.0 Optimized Code / Cleanup
+;==============================================================================
 
+; Do not show device denition include file(s) in output listfile
 .nolist
 .include "m16def.inc"
 .list
+; LCD DOG driver
+.include "lcd_dogm08_asm_driver_m16_pin_assign.inc"
+; 32-bit division subroutine
+.include "div32u.inc"
 
-//-----------------Variables-----------------//
-.dseg 
-counting:	   .byte 1 ; flag = 1 when 
-					   ; counter is counting
-meas_complete: .byte 1 ; flag = 1 when
-					   ; measurement 
-					   ; is complete
-count_low:	   .byte 1 ; low byte of count 
-					   ; read from counter1
-count_high:	   .byte 1 ; high byte of count
-					   ; read from counter1
+*** TODO: FIX ALL TITLES v ***
+//---------------------------Variables (what type of variables (where?)---------------------------//
+.dseg
+counting:	   .byte 1 ; flag = 1 when counter is counting
+meas_complete: .byte 1 ; flag = 1 when measurement is complete
+count_low:	   .byte 1 ; low byte of count read from counter1
+count_high:	   .byte 1 ; high byte of count read from counter1
 
 //---------------Vector Table---------------//
-.cseg 
+.cseg
 reset:
-.org RESET ; resest interrupt vector
-	rjmp start ; program starts here at reset
-.org ICP1addr  ; ICP1 interrupt vector
+.org RESET		   ; resest interrupt vector (Program starts here at reset)
+	rjmp start
+.org ICP1addr      ; ICP1 interrupt vector
 	rjmp count_ISR
 
 start:
 //-------------Port Configuration-------------//
-
 	sbi DDRA, 0
 
-	sbi DDRC, 0 ; Port C, Pin0 as
-				; output for chip
-				; select
+	sbi DDRC, 0 ; Port C, Pin0 as output for chip select
 
-	sbi DDRC, 1 ; Port C, Pin1 as
-				; output to LED
+	sbi DDRC, 1 ; Port C, Pin1 as output to LED
 
-	ldi r16, $3F  ; PORT D, Pin6 as 
-	out DDRD, r16 ; input of Vout for 
-				  ; analog front 
-				  ; end circuit
-				  ; Pin7=input for 
-	              ; pushbutton
+	ldi r16, $3F  ; PORT D, Pin6 as input of Vout for analog front end circuit
+	out DDRD, r16 ; Pin7 = input for pushbutton
 
-	ldi r16, $80   ; enabling pull-up
-	out PORTD, r16 ; resistor
+	ldi r16, $80   ; Enabling pull-up resistor
+	out PORTD, r16
 
-	ldi r16, $B3  ; PORTB as output
-	out DDRB, r16 ; MISO and both 
-				  ; inputs of analog 
-	              ; comparator as Input 
+	ldi r16, $B3  ; PORTB as output MISO and both inputs of analog comparator as Input
+	out DDRB, r16
 
 //------------Stack Initialization------------//
-
-	ldi r16, LOW(RAMEND)	; load low byte of				
-	out SPL, r16			; stack pointer
-	ldi r16, HIGH(RAMEND)	; load high byte of
-	out SPH, r16			; stack pointer
+	ldi r16, LOW(RAMEND)	; load low byte of stack pointer
+	out SPL, r16
+	ldi r16, HIGH(RAMEND)	; load high byte of stack pointer
+	out SPH, r16
 
 //---------Initialize Variable Values---------//
-	ldi r16, $00      ; intitialzing counter flag
-	sts counting, r16 ; to indicate not counting
-	sts meas_complete, r16 ; intializing 
-					   ; meas_complete flag
-					   ; to indicate measurement
-					   ; is not complete
+	ldi r16, $00      ; intitialzing counter flag (not counting)
+	sts counting, r16
+	sts meas_complete, r16 ; intializing meas_complete flag (measurement not complete)
 	call init_lcd_dog
 
 //------Configure Input Capture Interrupt------//
 //----------Configure Timer/Counter1----------//
-	ldi r16, $C4	  ; set to trigger at a rising 
-	out TCCR1B, r16	  ; edge & clkio/256
-	ldi r16, 1 << TICIE1; enabling input capture
-	out TIMSK, r16		; interrupt 
+	ldi r16, $C4	  ; set to trigger at a rising edge & clkio/256
+	out TCCR1B, r16
+	ldi r16, 1 << TICIE1; enabling input capture interrupt
+	out TIMSK, r16
 
 	sei		; enable gloabl interrupt
 
-main_loop:  
+main_loop:
 //-----------Polling Pushbutton Input-----------//
 	sbi PORTC, 0 ; deselect MAX5402
 
-	ldi r16, 0 << TICIE1; enabling input capture
-	out TIMSK, r16		; interrupt 			
+	ldi r16, 0 << TICIE1 ; enabling input capture interrupt
+	out TIMSK, r16
 
-	in r16, PIND ; calibrate voltage at Vce
-	sbrs r16, 7  ; if push button at PD7 is 
-	call auto_calibrate ; pressed
+	in r16, PIND ; calibrate voltage at Vce if push button at PD7 is pressed
+	sbrs r16, 7
+	call auto_calibrate
 
-	ldi r16, 1 << TICIE1; enabling input capture
-	out TIMSK, r16		; interrupt 
+	ldi r16, 1 << TICIE1 ; enabling input capture interrupt
+	out TIMSK, r16
 
-	cbi portB, 4 ; clear /SS of DOG 
-				 ; LCD = 0 (selected)
+	cbi portB, 4 ; deselect DOG LCD
 
 //----------Polling meas_complete----------//
 	lds r16, meas_complete
-	sbrs r16, 0 	; skip if meas_complete
-				    ; flag is set
+	sbrs r16, 0 	; skip if meas_complete flag is set
+
 	rjmp main_loop
 
 //-----Dividend & Divisor Configuration-----//
@@ -162,8 +121,7 @@ main_loop:
 	mov r16, r18
 	mov r17, r19
 
-	call bin2BCD16  ; convert current 
-					; timer count to BCD
+	call bin2BCD16  ; convert current timer count to BCD
 
 //-------------Convert BCD to ASCII-------------//
 	mov r25, r14
@@ -229,56 +187,50 @@ main_loop:
 	sts meas_complete, r16
 
 //------Enable Input Caputer Interrupt------//
-	ldi r16, 1 << TICIE1; enabling input capture
-	out TIMSK, r16		; interrupt 
+	ldi r16, 1 << TICIE1; enabling input capture interrupt
+	out TIMSK, r16
 
 	rjmp main_loop
 
-//*****************************************
-//* 
-//* "count_ISR" 
-//* 
+;==============================================================================
+//* "count_ISR"
 //*
-//* Description: ISR, triggered when
+//* Description: Interrupt service routine, triggered when
 //* rising edge is going into ICP1 pin
-//* 
 //*
-//* Author:		  Wilmer Suarez, Ji Hyun
+//*
+//* Author:		  Wilmer Suarez
 //* Version:      1.0
 //* Last updated: 11/29/2016
 //* Target:       ATmega16
-//* Number of words:		
-//* Number of cycles:	   
-//* Low registers modified: 
+//* Number of words:
+//* Number of cycles:
+//* Low registers modified:
 //* High registers modified: r16
-//*
-//*****************************************
-
-//-----ICP1 interrupt service routine-----//
+;==============================================================================
 count_ISR:
 	push r16
 	in r16, SREG
 	push r16
 
 	lds r16, counting
-	sbrs r16, 0 	; skip if counting
-				    ; flag is set 
+	sbrs r16, 0 	; skip if counting flag is set
 	rjmp counter_not_running
 	rjmp counter_running
 
 //--------------Counting = 0--------------//
 counter_not_running:
 // stopping counter
-	ldi r16, $C0	 
+	ldi r16, $C0
 	out TCCR1B, r16
 
 // clearing counter value
 	clr r16
-	out TCNT1H, r16 
-	out TCNT1L, r16 
+	out TCNT1H, r16
+	out TCNT1L, r16
 
 // starting counter
-	ldi r16, $C4     
+	ldi r16, $C4
 	out TCCR1B, r16
 
 // counting flag set
@@ -294,7 +246,7 @@ counter_not_running:
 //--------------Counting = 1--------------//
 counter_running:
 // stopping counter
-	ldi r16, $C0	 
+	ldi r16, $C0
 	out TCCR1B, r16
 
 // reading counter value
@@ -312,17 +264,16 @@ counter_running:
 	sts meas_complete, r16
 
 // disable Input Capture interrupt
-	ldi r16, 0 << TICIE1; enabling input capture
-	out TIMSK, r16		; interrupt 			
+	ldi r16, 0 << TICIE1; enabling input capture interrupt
+	out TIMSK, r16
 
 	pop r16
 	out SREG, r16
 	pop r16
 
 	reti ; return from ISR
-	
+
 //--------------------------------------------
-//*
 //* "bin2BCD16" - 16-bit Binary to BCD conversion
 //*
 //* This subroutine converts a 16-bit number
@@ -336,16 +287,14 @@ counter_running:
 //* Number of cycles	:751/768 (Min/Max)
 //* Low registers used	:3 (tBCD0,tBCD1,tBCD2)
 //* High registers used  :4
-//* (fbinL,fbinH,cnt16a,tmp16a)	
-//* Pointers used	:Z
-//*
+//* (fbinL,fbinH,cnt16a,tmp16a)
+//* Pointers used	: Z
 //--------------------------------------------
-
 //***** Subroutine Register Variables
 .equ	AtBCD0	=13		;address of tBCD0
 .equ	AtBCD2	=15		;address of tBCD1
 
-.def	tBCD0	=r13		;BCD value digits 1 
+.def	tBCD0	=r13		;BCD value digits 1
 ;and 0
 .def	tBCD1	=r14		;BCD value digits
 ; 3 and 2
@@ -356,13 +305,12 @@ counter_running:
 .def	tmp16a	=r19		;temporary value
 
 //***** Code
-
 bin2BCD16:
-	ldi	cnt16a,16	;Init loop counter	
+	ldi	cnt16a,16	;Init loop counter
 	clr	tBCD2		;clear result (3 bytes)
-	clr	tBCD1		
-	clr	tBCD0		
-	clr	ZH		;clear ZH 
+	clr	tBCD1
+	clr	tBCD0
+	clr	ZH		;clear ZH
 	;(not needed for AT90Sxx0x)
 bBCDx_1:lsl	fbinL		;shift input value
 	rol	fbinH		;through all bytes
@@ -393,36 +341,33 @@ bBCDx_3:
 	st	Z,tmp16a	;	store back
 	cpi	ZL,AtBCD0	;done all three?
 	brne	bBCDx_3		;loop again if not
-	rjmp	bBCDx_1	
+	rjmp	bBCDx_1
 
 //-------------------------------------
-//* 
 //* Name - "hex2ASCII"
 //*
 //* Description:
 //* Convert DIP switch value to ASCII to
 //* place in the buffer
 //*
-//* Author: Wilmer Suarez, Ji Hyun
+//* Author: Wilmer Suarez
 //* Version: 1.0
 //* Last updated: 11/06/2016
 //* Target: ATmega16 @ 1 MHz
 //* Number of words:
 //* Number of cycles: 20
-//* Low registers used:  
+//* Low registers used:
 //* High registers used: r16,r18
 //*
 //* Parameters:
 //* returns r16 loaded with ASCII
 //* form of DIP Switch input
 //*
-//* Notes: 
-//*
+//* Notes:
 //-------------------------------------
-
 hex2ASCII:
 	cpi r16, 10 ; compare r16 with 10
-	brlo zero_9 ; branch to 0_to_9 
+	brlo zero_9 ; branch to 0_to_9
 				; if r16 = $00-$09
 	subi r16, 10 ; subtract 10 from r16
 	subi r16, -$41 ; add $41 to r16
@@ -433,36 +378,33 @@ hex2ASCII:
 	ret
 
 //*******************************************
-//* 
 //* "Subroutine_name" - load_msg
 //*
 //* Description:
 //* Loads a predefined string msg into a
-//* specified diplay buffer.          
+//* specified diplay buffer.
 //*
-//* Author:
+//* Author: Wilmer Suarez
 //* Version:
 //* Last updated: 11/09/2016
 //* Target: ATmega16 @ 1 MHz
 //* Number of words:
 //* Number of cycles: 10
-//* Low registers used:  
+//* Low registers used:
 //* High registers used: r16
 //*
 //* Parameters:
 //*  assumes: Z = offset of message to be loaded.
 //*  returns: buffer loaded with message
 //*  calls:  none
-//*  called by: main program and diagnostics 
-//*
+//*  called by: main program and diagnostics
 //*****************************************
-
 load_msg:
 	sts dsp_buff + 0, r23 ; 1st digit
 	sts dsp_buff + 1, r24 ; 2nd digit
 	sts dsp_buff + 2, r20 ; 3rd digit
 	ldi r16, $2E
-	sts dsp_buff + 3, r16 ; decimal period	
+	sts dsp_buff + 3, r16 ; decimal period
 	sts dsp_buff + 4, r21 ; 1st decimal digit
 	sts dsp_buff + 5, r15 ; 2nd decimal digit
 	ldi r16, $20
@@ -472,44 +414,30 @@ load_msg:
 	ret
 
 //*------------------------------------
+//* Subroutine Name: "auto_calibrate"
 //*
-//* Subroutine Name:
-//* auto_calibrate
+//* Author: Wilmer Suarez
 //*
-//* AUTHOR(S): 
-//* Wilmer, Ji Hyun
-//* 
-//* Version: 
-//* 1.0
+//* Version: 1.0
 //*
-//* Last Updated: 
+//* Last Updated:
 //* 12/06/2016
 //*
-//* Target: 
-//* ATmega16A
+//* Target: ATmega16A
 //*
 //* DESCRIPTION:
-//* This program compares 
-//* the output of a 
-//* MAX5402 Digital Pot. and 
-//* the output of a voltage 
-//* divider.
-//*
+//* This subroutine compares the output of a MAX5402 Digital Pot and
+//* the output of a voltage divider.
 //*------------------------------------
-
 auto_calibrate:
-	sbi portB, 4 ; set /SS of DOG 
-				 ; LCD = 1 (Deselected)
-	
+	sbi portB, 4 ; set /SS of DOG LCD = 1 (Deselected)
 	cbi PORTC, 1 ; turn OFF LED
 
 //---Configuring SPI Control Register---//
-	
     ldi r16, $50  ; Enable SPI
 	out SPCR,r16  ; Data Order = MSB first
 	ldi r16, (1 << SPI2X) ; Set as Master
 	out SPSR, r16 ; SCK = fosc/2
-			      
 
 //-------Clear SPI Interrupt Flag-------//
     in r16, SPSR
@@ -518,48 +446,34 @@ auto_calibrate:
 //--------Configure Analog Comparator--------//
 	ldi r16, $00
 	out ACSR, r16
-
-	ldi r16, $00 ; Initial Value for MAX5402
-				 ; wiper position
+	ldi r16, $00 ; Initial Value for MAX5402 wiper position
 
 //------------Send Data to Slave------------//
 send_data:
-	cbi PORTC, 0 ; select MAX5402
-
-	out SPDR, r16 ; send data to the
-				  ; SPI Data Register
+	cbi PORTC, 0  ; select MAX5402
+	out SPDR, r16 ; send data to the SPI Data Register
 
 //------Wait for Data to be Transfered------//
 wait:
-	sbis SPSR, SPIF 
+	sbis SPSR, SPIF
 	rjmp wait
-  
-	sbi PORTC, 0 ; deselect MAX5402
+
+	sbi PORTC, 0   ; deselect MAX5402
 
 	inc r16		   ; compare to max value
-	SBIC ACSR, ACO ; If ACO = 0 skip next 
-	rjmp send_data ; instruction = Digital
-				   ; pot wiper = set point
-				   ; voltage = Vce of the 
+	SBIC ACSR, ACO ; If ACO = 0 skip next instruction
+	rjmp send_data ; Digital pot wiper = set point voltage = Vce of the
 				   ; LTR-3208E
 
 	sbi PORTC, 1
 
 	inc r16		   ; compare to max value
-	SBIC ACSR, ACO ; If ACO = 0 skip next 
+	SBIC ACSR, ACO ; If ACO = 0 skip next
 	rjmp send_data ; instruction = Digital
 				   ; pot wiper = set point
-				   ; voltage = Vce of the 
+				   ; voltage = Vce of the
 				   ; LTR-3208E
 
 	sbi PORTC, 1
 
 	ret
-	
-//-------------------------------
-// Include Files
-//-------------------------------
-
-// LCD DOG init/update procedures.
-.include "lcd_dogm08_asm_driver_m16_pin_assign.inc"  
-.include "div32u.inc"

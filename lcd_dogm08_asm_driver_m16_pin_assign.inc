@@ -1,12 +1,12 @@
 ;**************************************************************** v2a
-;   ATMega16 Version  (3.3V or 5V)                     
-;   
+;   ATMega16 Version (3.3V or 5V)
+;
 ;   This AVR-asm code module is usable as an include file for assembly
 ;   language and or mixed asm/C application programs.
 ;
 ;   This code is designed to be executed on an AVR ATMega microcomputer.
-;   And may be readily adapted for compatibility with IAR/AVR compilers. 
-;   See the IAR assembler reference guide for more information by 
+;   And may be readily adapted for compatibility with IAR/AVR compilers.
+;   See the IAR assembler reference guide for more information by
 ;   clicking 'Help > AVR Assembly Reference Guide" on the above menus.
 ;
 ;
@@ -21,8 +21,6 @@
 ;   The display module software interface uses an 8-byte
 ;   data (RAM) based display buffer.
 ;   (See below for more information.)
-
-;
 ;*********************************************************************
 ;
 ;   *** Port B Interface Definitions:
@@ -34,23 +32,19 @@
 ;
 ;      Notes:  RS ==>  0 = command regs, 1 = data regs
 ;             /SS = active low SPI select signal
-;
-;******************
 
+;*********************************************************************
 
-
-;***  DATA Segment  **************************************************   
+;***  DATA Segment  **************************************************
 .DSEG
 dsp_buff:   .byte 8
-
 
 ;***  CODE Segment Subroutines  ************************************
 .CSEG
 
 ;Equates added 11/30/16 so pin used for /RS can be changed
-.equ	PORT_RSn	= PORTA		;equates for the reg. select pin
+.equ	PORT_RSn	= PORTA   ;equates for the reg. select pin
 .equ	PORT_bit_RSn	= PORTA0
-
 
 ;************************
 ;NAME:        delay_30uS
@@ -69,7 +63,6 @@ d30_loop:     dec   r24        ; count down to
               brne  d30_loop   ; zero.
               pop   r24
               ret
-
 
 ;*********************
 ;NAME:        v_delay
@@ -99,8 +92,6 @@ v_delay:      rcall delay_30uS ; delay for ~30uS
               brne  v_delay  ; to inner loop delay until r23 zero.
               ret
 
-
-
 ;***********************
 ;NAME:        delay_40mS
 ;ASSUMES:     nothing
@@ -115,8 +106,6 @@ delay_40mS:   ldi   r22,0        ; load inner loop var
               rcall  v_delay     ; delay
               ret
 
-
-
 ;************************
 ;NAME:       init_spi_lcd
 ;ASSUMES:    IMPORTANT: PortB set as output (during program init)
@@ -129,13 +118,12 @@ init_spi_lcd:
       push r16
       ldi r16,(1<<SPE) | (1<<MSTR) | (1<<CPOL) | (1<<CPHA)
       out SPCR,r16   ; Enable SPI, Master, fck/4, 
-      
+
       ;kill any spurious data...
       in r16, SPSR   ; clear SPIF bit in SPSR
       in r16, SPDR   ;
       pop r16        ; restore r16 value...
       ret
-
 
 ;********************************
 ;NAME:       lcd_spi_transmit_CMD
@@ -162,8 +150,6 @@ wait_transmit:
      rjmp wait_transmit
      sbi   portB, 4   ; set PB2 = /SS = deselected
      ret
-
-
 
 ;*********************************
 ;NAME:       lcd_spi_transmit_DATA
@@ -194,7 +180,6 @@ wait_transmit1:
      sbi   portB, 4   ; set PB2 = /SS = deselected
      ret
 
-
 ;************************
 ;NAME:       init_lcd_dog
 ;ASSUMES:    nothing
@@ -224,42 +209,40 @@ func_set2:
 bias_set:
        ldi    r16,0x1E      ; set bias value.
        rcall  lcd_spi_transmit_CMD
-       rcall  delay_30uS    ;
+       rcall  delay_30uS
 
 power_ctrl:
        ldi    r16,0x50      ; ~0x50 for 5VDC, ~55 for 3.3VDC
-	                        ; (delicate adjustment). 
+	                        ; (delicate adjustment).
        rcall  lcd_spi_transmit_CMD
-       rcall  delay_30uS    ;
+       rcall  delay_30uS
 
 follower_ctrl:
-       ldi    r16,0x6C      ; follower mode on... 
+       ldi    r16,0x6C      ; follower mode on...
        rcall  lcd_spi_transmit_CMD
-       rcall  delay_40mS    ;
+       rcall  delay_40mS
 
 contrast_set:
-       ldi    r16,0x77      ; ~77@5VDC, ~7f@3.3VDC  
+       ldi    r16,0x77      ; ~77@5VDC, ~7f@3.3VDC
        rcall  lcd_spi_transmit_CMD
-       rcall  delay_30uS    ; 
+       rcall  delay_30uS
 
 display_on:
        ldi    r16,0x0c      ; display on, cursor off, blink off
        rcall  lcd_spi_transmit_CMD
-       rcall  delay_30uS    ; 
+       rcall  delay_30uS
 
 clr_display:
        ldi    r16,0x01      ; clear display, cursor home
        rcall  lcd_spi_transmit_CMD
 
-       rcall  delay_30uS    ;
+       rcall  delay_30uS
 
 entry_mode:
        ldi    r16,0x06      ; clear display, cursor home
        rcall  lcd_spi_transmit_CMD;
-       rcall  delay_30uS    ;
+       rcall  delay_30uS
        ret
-
-
 
 ;**************************
 ;NAME:       update_lcd_dog
@@ -277,12 +260,12 @@ update_lcd_dog:
        ldi   r20,8          ; init 'chars per line' counter.
 
        ;send line to the LCD module.
-wr_line1:     
+wr_line1:
        ldi   ZH, HIGH(dsp_buff)  ; init ptr to line 1 display buffer.
        ldi   ZL, LOW(dsp_buff)   ;
 snd_ddram_addr:
-       ldi   r16,0x80             ; init DDRAM addr-ctr 
-       rcall lcd_spi_transmit_CMD ; 
+       ldi   r16,0x80             ; init DDRAM addr-ctr
+       rcall lcd_spi_transmit_CMD ;
        rcall delay_30uS
 snd_buff:
        ld    r16, Z+
@@ -292,5 +275,3 @@ snd_buff:
        brne  snd_buff
 
        ret
-
-;******* End Of Include Module *********************************

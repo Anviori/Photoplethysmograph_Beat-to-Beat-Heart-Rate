@@ -11,7 +11,6 @@
 ;
 ;
 ;*********************************************************************
-;
 ;   This module contains procedures to initialize and update
 ;   Dthe EA DOGM081L LCD modules configured with one 8 charactor line.
 ;
@@ -22,7 +21,6 @@
 ;   data (RAM) based display buffer.
 ;   (See below for more information.)
 ;*********************************************************************
-;
 ;   *** Port B Interface Definitions:
 ;
 ;  Port B             PB7   PB6   PB5   PB4   PB3   PB2   PB1   PB0
@@ -32,18 +30,17 @@
 ;
 ;      Notes:  RS ==>  0 = command regs, 1 = data regs
 ;             /SS = active low SPI select signal
-
 ;*********************************************************************
 
 ;***  DATA Segment  **************************************************
 .DSEG
-dsp_buff:   .byte 8
+dsp_buff: .byte 8
 
 ;***  CODE Segment Subroutines  ************************************
 .CSEG
 
-;Equates added 11/30/16 so pin used for /RS can be changed
-.equ	PORT_RSn	= PORTA   ;equates for the reg. select pin
+;Equates added so pin used for RS (Register Select) can be changed
+.equ	PORT_RSn	= PORTA
 .equ	PORT_bit_RSn	= PORTA0
 
 ;************************

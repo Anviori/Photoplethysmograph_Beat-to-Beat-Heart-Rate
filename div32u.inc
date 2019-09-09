@@ -6,11 +6,11 @@
 ;* This subroutine divides the two 32-bit numbers
 ;* "dd32u3:dd32u2:dd32u1:dd32u0" (dividend)
 ;* and
-;* "dv32u3:dv32u2:dv32u3:dv32u2" (divisor).
+;* "dv32u3:dv32u2:dv32u1:dv32u0" (divisor).
 ;* The result is placed in
-;* "dres32u3:dres32u2:dres32u3:dres32u2"
+;* "dres32u3:dres32u2:dres32u1:dres32u0"
 ;* and the remainder in
-;* "drem32u3:drem32u2:drem32u3:drem32u2"
+;* "drem32u3:drem32u2:drem32u1:drem32u0"
 ;*
 ;* Number of words:
 ;* Number of cycles: 655/751 (Min/Max) ATmega16
@@ -21,7 +21,6 @@
 ;******************************************
 
 ;***** Subroutine Register Variables
-
 .def	drem32u0 =r12    ;remainder
 .def	drem32u1 =r13
 .def	drem32u2 =r14
